@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>茶马古道鲁史古镇AI导览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", system-ui, sans-serif;
+        }
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background-color: #f8f7f4;
+            color: #333;
+        }
+        .page {
+            width: 100vw;
+            height: calc(100vh - 60px);
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .page.active {
+            display: block;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            background: #ffffff;
+            border-top: 1px solid #ddd;
+            z-index: 999;
+        }
+        .nav-item {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #666;
+        }
+        .nav-item.active {
+            color: #8c5228;
+            font-weight: bold;
+        }
+        .title-main {
+            font-size: 24px;
+            color: #8c5228;
+            text-align: center;
+            margin: 16px 0 8px;
+            font-weight: bold;
+        }
+        .sub-desc {
+            font-size: 15px;
+            line-height: 1.7;
+            text-align: center;
+            color: #444;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin:12px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card h3 {
+            color:#8c5228;
+            margin-bottom:8px;
+            font-size:18px;
+        }
+        .card p, .card li {
+            line-height:1.7;
+            font-size:15px;
+        }
+        .map-box{
+            position:relative;
+            width:100%;
+            margin:16px 0;
+        }
+        .map-img{
+            width:100%;
+            border-radius:10px;
+            display:block;
+        }
+        .map-point{
+            width:18px;
+            height:18px;
+            border-radius:50%;
+            background-color:#dd3333;
+            position:absolute;
+            cursor:pointer;
+            border:2px solid #fff;
+        }
+        .view-tab{
+            display:flex;
+            gap:4px;
+            margin:12px 0;
+        }
+        .view-tab button{
+            flex:1;
+            padding:10px;
+            border:none;
+            border-radius:6px;
+            font-size:15px;
+        }
+        .view-tab .active-tab{
+            background:#8c5228;
+            color:#fff;
+        }
+        .pop-story{
+            background:#fff3e8;
+            padding:14px;
+            border-radius:10px;
+            margin-top:12px;
+            display:none;
+        }
+        .pop-img{
+            width:100%;
+            border-radius:8px;
+            margin-bottom:10px;
+        }
+        .audio-box{
+            margin:10px 0;
+        }
+        .qna{
+            background:#f0f7ff;
+            padding:12px;
+            border-radius:8px;
+            margin-top:10px;
+        }
+        .qna h4{
+            color:#2b4b80;
+            margin-bottom:6px;
+        }
+        /* =====首页背景图样式===== */
+        .home-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .home-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .home-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: -1;
+        }
+        .home-content {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        .home-content .title-main {
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            margin-top: 30px;
+        }
+        .home-content .sub-desc {
+            color:#fff;
+            text-shadow:0 2px 6px rgba(0,0,0,0.6);
+        }
+        .home-content .card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body>
+<!-- 第一页：项目介绍 & 目录（带背景图） -->
+<div class="page active" id="page1">
+    <div class="home-bg">
+        <img src="lushi_bg.jpg" alt="鲁史古镇背景">
+    </div>
+    <div class="home-mask"></div>
+    <div class="home-content">
+        <h1 class="title-main">茶马古道鲁史古镇AI导览</h1>
+        <p class="sub-desc">凤庆县 · 鲁史古镇交互式导览</p>
+
+        <div class="card">
+            <h3>📌 项目目的</h3>
+            <p>本项目依托鲁史古镇茶马古道历史文化，利用数字化AI导览技术，留存马帮历史；在保护古镇原始风貌、规避过度商业化的前提下，完善文化传播途径，实现文化传承与古镇保护并行。</p>
+        </div>
+
+        <div class="card">
+            <h3>👥 面向对象</h3>
+            <ul style="padding-left:20px;">
+                <li>鲁史古镇本地居民、马帮后人</li>
+                <li>到古镇参观的游客、研学学生</li>
+                <li>古镇文化保护、文旅相关工作人员</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>📖 目录</h3>
+            <ul style="padding-left:20px;">
+                <li>① 古镇全景地图（航拍/卫星云图切换）</li>
+                <li>② 景点点位（含精确经纬度）</li>
+                <li>③ 景点实拍图片</li>
+                <li>④ 景点文本资料</li>
+                <li>⑤ 讲解音频（自行插入替换）</li>
+                <li>⑥ 点位配套问答思考题</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>📍 点位经纬度信息</h3>
+            <ul style="padding-left:20px; font-size:14px;">
+                <li>楼梯街： 24.4310°N，99.9865°E</li>
+                <li>四方街： 24.4302°N，99.9873°E</li>
+                <li>骆家大院：24.4296°N，99.9881°E</li>
+                <li>云大书院：24.4327°N，99.9842°E</li>
+                <li>古镇核心区总览：24.4305°N，99.9870°E</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 第二页：AI导览（详细版） -->
+<div class="page" id="page2">
+    <h1 class="title-main">AI交互式导览</h1>
+    <div class="view-tab">
+        <button class="active-tab" onclick="switchMap('air')">航拍视图</button>
+        <button onclick="switchMap('sat')">卫星视图</button>
+    </div>
+    <div class="map-box">
+        <img id="mapImg" class="map-img" src="lushi_air.png" alt="鲁史古镇卫星云图">
+        <!-- 地图红点标记 -->
+        <div class="map-point" style="top:48%;left:12%;" onclick="showPointInfo(0)"></div>
+        <div class="map-point" style="top:40%;left:44%;" onclick="showPointInfo(1)"></div>
+        <div class="map-point" style="top:34%;left:56%;" onclick="showPointInfo(2)"></div>
+        <div class="map-point" style="top:82%;left:22%;" onclick="showPointInfo(3)"></div>
+        <div class="map-point" style="top:22%;left:38%;" onclick="showPointInfo(4)"></div>
+    </div>
+    <div class="pop-story" id="storyBox">
+        <div id="pointContent"></div>
+        <div class="audio-box">
+            <p>🔊 讲解音频</p>
+            <audio id="audioPlayer" controls>
+                <source id="audioSource" src="" type="audio/mpeg">
+                你的浏览器不支持音频播放
+            
+        </div>
+        <div class="qna" id="qnaBox"></div>
+    </div>
+    <p style="margin-top:10px; font-size:14px; color:#555;">点击地图红色地标，查看景点实拍图、文字资料，自动播放语音讲解、浏览配套问答</p>
+</div>
+
+<!--底部导航-->
+<div class="bottom-nav">
+    <button class="nav-item active" onclick="changePage(1,this)">项目介绍</button>
+    <button class="nav-item" onclick="changePage(2,this)">AI导览</button>
+</div>
+
+<script>
+    //点位数据：名称、介绍、图片、音频文件名、问答
+    const pointData = [
+        {
+            name:"楼梯街",
+            lat:"24.4310°N",
+            lng:"99.9865°E",
+            img:"lushi_loutijie.jpg",
+            text:`楼梯街，堪称鲁史古镇的标志性景观，作为茶马古道过境的核心地段，它宛如一条历史的丝带，串联起古镇的过去与现在。这条古街全长200米，宽4米，62级青石台阶如一条沉稳的长链，纵贯古镇南北，将鲁史一分为二。它形成于1302年，历经宋、元、明、清四代的岁月更迭，至今已有七百年风雨沧桑。在漫长的茶马贸易时代，楼梯街是马帮商队必经之路。无数匹驮着茶叶、丝绸、药材等货物的马匹，年复一年地踏过这坚硬的青石板。天长日久，马蹄与石板剧烈摩擦，台阶中央的石板被踏穿，碎块历经数十次更换仍残留至今，留下了深深浅浅的马蹄坑痕。这些坑痕宛如时光的刻刀，精心雕琢出往昔的繁华与艰辛。抚摸这些痕迹，仿佛能听见悠远的马铃声在山谷间回荡，赶马汉子的吆喝声在耳畔交织。当年，马帮们翻山越岭，不畏路途遥远和艰险，将滇西的物资与文化传播到远方，又从远方带回新的物品和理念。如今，虽然往日的繁华已随着茶马古道的衰落而逝去，但楼梯街依然静静地矗立在那里，以它独有的方式向人们诉说着那段波澜壮阔的历史，成为研究茶马古道文化珍贵的活化石。`,
+            audio:"lushi_stair.mp3",
+            q:"问：为什么楼梯街的石板会出现凹陷的马蹄印？\n答：长年累月，马帮的马蹄、驮货重物不断摩擦踩踏石板，慢慢形成凹陷印记，是茶马古道繁华历史的实物证据。"
+        },
+        {
+            name:"四方街",
+            lat:"24.4302°N",
+            lng:"99.9873°E",
+            img:"lushi_sifangjie.jpg",
+            text:`四方街，稳稳地坐落在鲁史古镇的中心位置，宛如古镇的心脏，跳动着历史的脉搏，见证了古镇的兴盛与变迁。在过去，四方街是古镇最为热闹繁华之地，犹如一个巨大的磁场，吸引着各地的商贾云集于此。来自不同地方的商人，带着茶叶、盐、百货等琳琅满目的商品汇聚到这里，进行着繁忙的贸易往来。南来北往的马帮也在此驻足，将茶叶、丝、盐、药材等物资在这里流通、交换。一时间，四方街人声鼎沸，叫卖声、讨价还价声不绝于耳，成为了古镇经济交流的重要枢纽，推动了古镇商业的蓬勃发展。同时，作为官衙所在地，四方街承担着管理古镇的重要职能。在这里，官府颁布着古镇的各项政令，维护着古镇的社会秩序，调解着民间的纠纷。它是古镇政治、经济、文化的交汇点，见证了古镇的繁荣与稳定，也经历了古镇的动荡与变迁。如今，虽然往日的喧嚣已随着时代的变迁而不再，但四方街的古建筑依然保留着当年的风貌。古老的店铺、斑驳的墙壁，仿佛都在向人们展示着它曾经的辉煌。四方街就像一部生动的史书，每一页都写满了古镇的历史与文化，等待着后人去翻阅、去解读。`,
+            audio:"lushi_square.mp3",
+            q:"问：四方街在茶马古道中承担什么功能？\n答：承担物资交易、马帮休整、信息互通的集市功能，是滇西茶马古道重要的中转交易场所。"
+        },
+        {
+            name:"骆家大院",
+            lat:"24.4296°N",
+            lng:"99.9881°E",
+            img:"lushi_luojia.jpg",
+            text:`骆家大院，无疑是鲁史古镇中一颗璀璨的明珠，它静静地位于楼梯街一侧，散发着独特的光芒，是云南老字号“俊昌号”的发源地。“俊昌号”由骆英才于1922年创建，骆英才作为鲁史第一个人工种茶的人，开设“俊昌号”茶庄后，长期从事茶叶贸易，并将“凤山春尖”茶叶远销西藏，成就了一段古道商业传奇骆家大院规模宏大，共有5个院子，34间房，建筑风格独具匠心，有着“四合五天井，走马转角楼”的格局。走进大院，门上那副“普享西南俊昌号，细数茶马数家珍”的对联格外醒目，彰显着大院曾经的辉煌与荣耀。大院的建筑融合了江浙风格与大理白族特色，“三一照壁”“四合五天井”的院落中，檐头雕龙刻凤，栩栩如生，仿佛在诉说着当年的富贵与繁华；照壁上写着“福”“寿”大字，寓意着家宅兴旺、幸福安康。在这里，你可以感受到当年骆家商贾的富足生活，以及他们对美好生活的向往与追求。骆家大院不仅是一座精美的建筑，更是鲁史古镇茶马文化的重要象征。它见证了古镇茶叶贸易的繁荣与发展，承载着无数茶商的梦想与汗水。每一块砖石、每一根木梁都蕴含着深厚的历史文化底蕴，是研究茶马古道商业文化和建筑艺术的重要实物资料。`,
+            audio:"lushi_luo.mp3",
+            q:"问：骆家大院建筑属于哪种风格，有什么保护难点？\n答：滇西“三坊一照壁”民居；土坯墙体容易受雨水、风化侵蚀，需要定期修缮，减少人为踩踏破坏。"
+        },
+        {
+            name:"云大书院",
+            lat:"24.4327°N",
+            lng:"99.9842°E",
+            img:"lushi_shuyuan.jpg",
+            text:`云大书院，宛如一颗文化之星，镶嵌在鲁史古镇的土地上，成为古镇的文化地标。它集研究、藏书、展览于一体，由云南大学于2014年设立，坐落在兴隆寺、驻马店旧址之上，承载着古镇的历史与文化记忆，肩负着传承和弘扬文化的使命。走进云大书院，万余本藏书琳琅满目，仿佛置身于知识的海洋。这里涵盖了历史、文化、艺术、哲学等各个领域的书籍，无论是研究茶马古道文化的学者，还是热爱阅读的普通民众，都能在这里找到自己所需的书籍，汲取知识的养分。它为好书之人提供了精神栖息地，让人们在书的世界里遨游，感受文化的魅力。
+书院还经常举办各种文化活动和展览，展示着古镇的历史文化和艺术成果。通过这些活动和展览，人们可以更深入地了解古镇的过去和现在，感受茶马古道文化的博大精深。同时，云大书院也是党校培训基地，不断夯实着古镇的红色基础，为古镇的发展培养着优秀的人才。书院牌坊外的大古井旁，上百年的沙朴树群中有一株虬枝盘曲的菩提树，与兴隆寺同龄。这株菩提树宛如一位智者，静静地守护着书院，为书院增添了一份古朴与宁静。云大书院以其独特的文化魅力，成为了鲁史古镇一道亮丽的风景线，吸引着众多游客和文化爱好者前来参观、学习，为古镇的文化传承和发展注入了新的活力。`,
+            audio:"lushi_school.mp3",
+            q:"问：云大书院对于鲁史古镇有什么特殊意义？\n答：它不只是古建筑，代表战乱年代延续教育火种，为闭塞的茶马古镇传播新知识，丰富古镇人文底蕴。"
+        },
+        {
+            name:"古镇总览",
+            lat:"24.4305°N",
+            lng:"99.9870°E",
+            img:"lushi_guzhen.jpg",
+            text:`鲁史古镇，宛如一颗镶嵌在云南省临沧市凤庆县东北部的璀璨明珠，在历史的长河中闪耀着独特的光芒。它作为云南西部茶马古道第一镇，占据着重要的地理位置，曾是滇西茶马古道的咽喉要塞，是南北物资交流、文化交融的关键节点，因而也成为了中国最神秘的三大古镇之一。这座古镇历史源远流长，在漫长的岁月里，它历经风雨洗礼，却始终保留着深厚的历史底蕴。早在2002年，鲁史古镇就被列为省级重点保护单位，此后更是荣誉加身，成为省级历史文化名镇、全国特色小镇等，而茶马古道鲁史段也在2013年荣升为国家第七批文物保护单位。鲁史古镇是滇西保存较为完好、规模较大的古建筑群之一。由于其地处茶马古道要冲，南来北往的人纷纷在此定居经商。不同地域的文化在这里碰撞、交融，形成了独特的历史文化风貌。从总体上看，街场的布局及民宅的建设风格都具有浓厚的宗教文化特点，同时又兼具大理白族文化和南诏风格的建筑特色，是茶马古道文化的重要承载地，每一块砖石、每一片瓦砾都诉说着往昔的故事。`,
+            audio:"lushi_main.mp3",
+            q:"问：鲁史古镇发展文旅，如何避免过度商业化？\n答：优先数字化线上传播，控制商铺改造规模，保留原住民生活场景，保护古建筑本体，以数字导览分担客流压力。"
+        }
+    ];
+
+    //页面切换
+    function changePage(pageNum, btn){
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+        document.getElementById('page'+pageNum).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('storyBox').style.display = "none";
+        document.getElementById('audioPlayer').pause();
+    }
+
+    //展示点位信息 + 景点图片 + 自动播放音频
+    function showPointInfo(index){
+        const data = pointData[index];
+        const content = document.getElementById('pointContent');
+        const qnaBox = document.getElementById('qnaBox');
+        const audioSource = document.getElementById('audioSource');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        //先停止正在播放的音频
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+
+        // 插入景点图片、标题、经纬度、介绍文字
+        content.innerHTML = `
+            <img class="pop-img" src="${data.img}" alt="${data.name}">
+            <h3>${data.name}</h3>
+            <p>📍经纬度：${data.lat}，${data.lng}</p>
+            <p style="margin-top:8px;">${data.text}</p>
+        `;
+
+        qnaBox.innerText = data.q;
+        audioSource.src = data.audio;
+        audioPlayer.load();
+
+        document.getElementById('storyBox').style.display = "block";
+
+        //加载完成后自动播放
+        audioPlayer.oncanplay = function(){
+            audioPlayer.play();
+        }
+    }
+
+    //航拍/卫星切换
+    function switchMap(type){
+        const mapImg = document.getElementById('mapImg');
+        const tabs = document.querySelectorAll('.view-tab button');
+        tabs.forEach(t=>t.classList.remove('active-tab'));
+        event.target.classList.add('active-tab');
+        document.getElementById('storyBox').style.display = "none";
+        document.getElementById('audioPlayer').pause();
+    }
+</script>
+</body>
+</html>
